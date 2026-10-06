@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#161a45" />
+  <title>Income &amp; Expense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --navy: #12163d;
+  --navy-2: #1d2260;
+  --violet: #6d4aff;
+  --violet-2: #8b6cff;
+  --bg: #f4f5fb;
+  --surface: #ffffff;
+  --ink: #161a3a;
+  --muted: #7a7f9c;
+  --line: #e8eaf4;
+  --green: #12a466;
+  --green-soft: #e4f7ee;
+  --red: #f0523d;
+  --red-soft: #fff0ec;
+  --shadow: 0 8px 24px rgba(30, 34, 96, 0.08);
+  --shadow-lg: 0 14px 34px rgba(30, 34, 96, 0.16);
+  --bar-h: 88px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom));
+}
+
+body.locked { overflow: hidden; }
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+[hidden] { display: none !important; }
+
+/* ---------- Header ---------- */
+.hero {
+  background: linear-gradient(150deg, var(--navy) 0%, var(--navy-2) 55%, #4a34c9 100%);
+  color: #fff;
+  padding: calc(34px + env(safe-area-inset-top)) 22px 96px;
+  border-radius: 0 0 32px 32px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero p {
+  margin: 6px 0 0;
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---------- Layout ---------- */
+.app {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---------- Summary ---------- */
+.summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: -68px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 16px 16px 18px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.card .label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.card .amount {
+  display: block;
+  margin-top: 8px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+}
+
+.card.balance {
+  grid-column: 1 / -1;
+  padding: 20px 20px 22px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--green-soft) 100%);
+  box-shadow: var(--shadow-lg);
+}
+
+.card.balance .amount { font-size: 2.5rem; color: var(--green); line-height: 1.1; }
+.card.balance .amount.negative { color: var(--red); }
+.card.income .amount { font-size: 1.5rem; color: var(--navy-2); }
+.card.expense .amount { font-size: 1.5rem; color: var(--red); }
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 24px 0 16px;
+  padding: 4px;
+  background: #e9eaf6;
+  border-radius: 16px;
+}
+
+.tab {
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--muted);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.tab.active {
+  background: var(--surface);
+  color: var(--violet);
+  box-shadow: 0 3px 10px rgba(30, 34, 96, 0.1);
+}
+
+/* ---------- Lists ---------- */
+.list { display: flex; flex-direction: column; gap: 12px; }
+
+.entry {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.sheet .entry { box-shadow: none; border: 1.5px solid var(--line); }
+
+.entry-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.entry-title { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+
+.entry-date {
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  padding-top: 2px;
+}
+
+.chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eceaff;
+  color: var(--violet);
+  font-size: 0.78rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip.unlinked { background: #f0f1fa; color: var(--muted); }
+
+.entry-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: #f0f1fa;
+  color: var(--navy-2);
+}
+
+.icon-btn.del { background: var(--red-soft); color: var(--red); }
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-btn:active { transform: scale(0.94); }
+
+.rows { margin: 0; padding: 0; }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.row span { min-width: 0; word-break: break-word; }
+.row b { color: var(--ink); font-weight: 700; white-space: nowrap; }
+.row.empty b { color: #c3c6d9; font-weight: 600; }
+
+.others { margin-top: 6px; padding-top: 6px; border-top: 1.5px dashed var(--line); }
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--red-soft);
+  color: var(--red);
+  font-weight: 800;
+}
+
+.total-row span { font-size: 0.85rem; letter-spacing: 0.06em; }
+.total-row b { font-size: 1.3rem; letter-spacing: -0.01em; }
+
+/* Income card */
+.inc-name { font-weight: 700; color: var(--muted); font-size: 0.92rem; word-break: break-word; }
+.inc-amount { margin-top: 2px; font-size: 1.7rem; font-weight: 800; color: var(--navy-2); letter-spacing: -0.02em; word-break: break-word; }
+
+.inc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+
+.stat { min-width: 0; padding: 10px 12px; border-radius: 14px; background: #f6f7fd; }
+.stat small { display: block; color: var(--muted); font-weight: 600; font-size: 0.78rem; }
+.stat b { display: block; font-size: 1.05rem; font-weight: 800; word-break: break-word; }
+.stat.spent b { color: var(--red); }
+.stat.bal { background: var(--green-soft); }
+.stat.bal b { color: var(--green); }
+.stat.bal.negative { background: var(--red-soft); }
+.stat.bal.negative b { color: var(--red); }
+
+.bar { height: 8px; margin-top: 12px; border-radius: 99px; background: #e9eaf6; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--violet), #ff8a4c); }
+.bar.over i { background: var(--red); }
+
+/* Empty state */
+.empty-state {
+  padding: 36px 20px;
+  text-align: center;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sheet .empty-state { box-shadow: none; border: 1.5px dashed var(--line); padding: 26px 16px; }
+
+.empty-state strong { display: block; color: var(--ink); font-size: 1.05rem; margin-bottom: 4px; }
+
+/* ---------- Footer ---------- */
+.footer { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 28px 0 8px; }
+
+.link-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.link-btn.accent { color: var(--violet); border-color: #d9d2ff; background: #f3f0ff; }
+
+/* ---------- Bottom action bar ---------- */
+.actionbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(244, 245, 251, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  transition: transform 0.12s, filter 0.2s;
+}
+
+.btn:active { transform: scale(0.97); }
+.btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+
+.btn-income { background: linear-gradient(135deg, var(--violet), var(--violet-2)); box-shadow: 0 8px 18px rgba(109, 74, 255, 0.32); }
+.btn-expense { background: linear-gradient(135deg, #f0523d, #ff8a4c); box-shadow: 0 8px 18px rgba(240, 82, 61, 0.28); }
+.btn-danger { background: var(--red); }
+.btn-ghost { background: #eceef8; color: var(--navy-2); }
+.btn.full { width: 100%; margin-top: 18px; }
+.btn.sm { width: 100%; min-height: 46px; margin-top: 12px; border-radius: 14px; font-size: 0.95rem; }
+
+/* ---------- Sheets ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(14, 17, 50, 0.55);
+  animation: fade 0.18s ease-out;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  animation: rise 0.24s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.grabber { width: 44px; height: 5px; margin: 0 auto 16px; border-radius: 3px; background: #d9dbea; }
+
+.sheet h2 { margin: 0 0 16px; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; word-break: break-word; }
+
+.sub-date { margin: -10px 0 14px; color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+
+.list-title { margin: 22px 0 12px; font-size: 1rem; font-weight: 800; }
+
+.mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mini-stats .stat b { font-size: 0.95rem; }
+
+.field { display: block; margin-bottom: 14px; min-width: 0; }
+
+.field span { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+
+.field input,
+.field select,
+.other-row input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: #f8f9fe;
+  font-size: 1.05rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a7f9c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+}
+
+.field input:focus,
+.field select:focus,
+.other-row input:focus { border-color: var(--violet); box-shadow: 0 0 0 4px rgba(109, 74, 255, 0.14); background-color: #fff; }
+
+.hint { min-height: 20px; margin: -6px 0 10px; font-size: 0.86rem; font-weight: 600; color: var(--green); }
+.hint.negative { color: var(--red); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+.sub { margin: 4px 0 8px; font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+
+.other-row { display: grid; grid-template-columns: minmax(0, 1fr) 104px 44px; gap: 8px; margin-bottom: 8px; align-items: center; }
+.other-row .icon-btn { width: 44px; height: 54px; border-radius: 14px; }
+
+.add-other {
+  width: 100%;
+  min-height: 50px;
+  margin-bottom: 14px;
+  border: 1.5px dashed #c9cbe6;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--violet);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.day-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 0 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--red-soft);
+  color: var(--red);
+  font-weight: 700;
+}
+
+.day-total strong { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+
+.error { min-height: 20px; margin: 8px 0 0; color: var(--red); font-size: 0.88rem; font-weight: 600; }
+
+.muted { margin: -6px 0 0; color: var(--muted); font-weight: 500; }
+
+.sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.sheet-actions.tight { margin-top: 14px; }
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise { from { transform: translateY(40px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+
+@media (min-width: 521px) {
+  .overlay { align-items: center; }
+  .sheet { border-radius: 28px; padding-bottom: 22px; }
+  .grabber { display: none; }
+  .actionbar { border-radius: 20px 20px 0 0; }
+}
+
+@media (max-width: 340px) {
+  .card.balance .amount { font-size: 2rem; }
+  .card.income .amount, .card.expense .amount { font-size: 1.25rem; }
+  .btn { font-size: 0.92rem; padding: 0 10px; }
+  .other-row { grid-template-columns: minmax(0, 1fr) 88px 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <h1>Income &amp; Expense</h1>
+    <p>Track your daily money easily</p>
+  </header>
+
+  <main class="app">
+
+    <!-- Summary -->
+    <section class="summary" aria-label="Summary">
+      <article class="card balance">
+        <span class="label"><span class="emoji" aria-hidden="true">💵</span> Balance</span>
+        <strong class="amount" id="balanceTotal">₹0</strong>
+      </article>
+      <article class="card income">
+        <span class="label"><span class="emoji" aria-hidden="true">💰</span> Income</span>
+        <strong class="amount" id="incomeTotal">₹0</strong>
+      </article>
+      <article class="card expense">
+        <span class="label"><span class="emoji" aria-hidden="true">💸</span> Expenses</span>
+        <strong class="amount" id="expenseTotal">₹0</strong>
+      </article>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="tabs" role="tablist" aria-label="Transactions">
+      <button class="tab active" role="tab" aria-selected="true" id="tabExpenses">Daily Expenses</button>
+      <button class="tab" role="tab" aria-selected="false" id="tabIncome">Income</button>
+    </nav>
+
+    <section id="expensesPanel" class="panel" aria-labelledby="tabExpenses">
+      <div id="expenseList" class="list"></div>
+    </section>
+
+    <section id="incomePanel" class="panel" hidden aria-labelledby="tabIncome">
+      <div id="incomeList" class="list"></div>
+    </section>
+
+    <footer class="footer">
+      <button type="button" class="link-btn accent" id="exportAllBtn">Download Excel</button>
+      <button type="button" class="link-btn" id="clearAllBtn">Clear All</button>
+    </footer>
+  </main>
+
+  <!-- Bottom action bar -->
+  <div class="actionbar">
+    <button type="button" class="btn btn-income" id="addIncomeBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Add Income
+    </button>
+    <button type="button" class="btn btn-expense" id="addExpenseBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Add Expense
+    </button>
+  </div>
+
+  <!-- Income sheet -->
+  <div class="overlay" id="incomeModal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="incomeTitle">
+      <div class="grabber" aria-hidden="true"></div>
+      <h2 id="incomeTitle">Add Income</h2>
+      <form id="incomeForm" novalidate>
+        <label class="field">
+          <span>Amount (₹)</span>
+          <input type="number" id="incomeAmount" inputmode="decimal" min="0" step="any" placeholder="0" required />
+        </label>
+        <label class="field">
+          <span>Date</span>
+          <input type="date" id="incomeDate" required />
+        </label>
+        <label class="field">
+          <span>Note</span>
+          <input type="text" id="incomeNote" maxlength="60" placeholder="e.g. Salary" autocomplete="off" />
+        </label>
+        <p class="error" id="incomeError" role="alert"></p>
+        <div class="sheet-actions">
+          <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn-income">Save income</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Income details sheet -->
+  <div class="overlay" id="detailModal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="grabber" aria-hidden="true"></div>
+      <h2 id="detailTitle">Income</h2>
+      <p class="sub-date" id="detailDate"></p>
+      <div class="mini-stats">
+        <div class="stat"><small>Income</small><b id="detailIncome">₹0</b></div>
+        <div class="stat spent"><small>Spent</small><b id="detailSpent">₹0</b></div>
+        <div class="stat bal" id="detailBalBox"><small>Balance</small><b id="detailBalance">₹0</b></div>
+      </div>
+      <div class="sheet-actions tight">
+        <button type="button" class="btn btn-expense" id="detailAddExpense">Add expense</button>
+        <button type="button" class="btn btn-ghost" id="detailExport">Download Excel</button>
+      </div>
+      <h3 class="list-title">Expenses from this income</h3>
+      <div id="detailList" class="list"></div>
+      <button type="button" class="btn btn-ghost full" data-close>Close</button>
+    </div>
+  </div>
+
+  <!-- Expense sheet -->
+  <div class="overlay" id="expenseModal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="expenseTitle">
+      <div class="grabber" aria-hidden="true"></div>
+      <h2 id="expenseTitle">Add Expense</h2>
+      <form id="expenseForm" novalidate>
+        <label class="field">
+          <span>From income</span>
+          <select id="exIncome"></select>
+        </label>
+        <p class="hint" id="exHint"></p>
+        <label class="field">
+          <span>Date</span>
+          <input type="date" id="expenseDate" required />
+        </label>
+        <div class="grid2">
+          <label class="field">
+            <span>Morning</span>
+            <input type="number" id="exMorning" inputmode="decimal" min="0" step="any" placeholder="0" />
+          </label>
+          <label class="field">
+            <span>Afternoon</span>
+            <input type="number" id="exAfternoon" inputmode="decimal" min="0" step="any" placeholder="0" />
+          </label>
+          <label class="field">
+            <span>Evening</span>
+            <input type="number" id="exEvening" inputmode="decimal" min="0" step="any" placeholder="0" />
+          </label>
+          <label class="field">
+            <span>Night</span>
+            <input type="number" id="exNight" inputmode="decimal" min="0" step="any" placeholder="0" />
+          </label>
+        </div>
+
+        <div class="sub">Other expenses</div>
+        <div id="otherRows"></div>
+        <button type="button" class="add-other" id="addOtherBtn">+ Add other expense</button>
+
+        <div class="day-total">
+          <span>Day total</span>
+          <strong id="expenseDayTotal">₹0</strong>
+        </div>
+        <p class="error" id="expenseError" role="alert"></p>
+        <div class="sheet-actions">
+          <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn-expense">Save expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm sheet -->
+  <div class="overlay" id="confirmModal" hidden>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+      <div class="grabber" aria-hidden="true"></div>
+      <h2 id="confirmText">Delete all saved data?</h2>
+      <p class="muted" id="confirmSub">This cannot be undone.</p>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-ghost" id="confirmCancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmOk">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  // If index.html and script.js are from different versions, say so instead of failing silently.
+  var REQUIRED = ['tabExpenses', 'tabIncome', 'expenseList', 'incomeList', 'detailList', 'addIncomeBtn', 'addExpenseBtn',
+    'addOtherBtn', 'detailAddExpense', 'detailExport', 'exportAllBtn', 'clearAllBtn', 'incomeModal', 'detailModal',
+    'expenseModal', 'confirmModal', 'exIncome', 'otherRows', 'exHint'];
+  window.__appReady = true;
+  var missingIds = REQUIRED.filter(function (id) { return !document.getElementById(id); });
+  if (missingIds.length) {
+    document.body.insertAdjacentHTML('afterbegin',
+      '<div style="position:relative;z-index:99;margin:12px;padding:14px;border-radius:14px;background:#fff0ec;color:#c2371f;font:600 14px system-ui">' +
+      'Files are out of date. Upload all 3 files (index.html, style.css, script.js), then refresh the page.</div>');
+    return;
+  }
+
+  // Same key as before, so data saved by the earlier version is kept.
+  var STORAGE_KEY = 'income-expense-tracker-v1';
+  var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  var PERIODS = [
+    { key: 'morning', label: 'Morning', input: 'exMorning' },
+    { key: 'afternoon', label: 'Afternoon', input: 'exAfternoon' },
+    { key: 'evening', label: 'Evening', input: 'exEvening' },
+    { key: 'night', label: 'Night', input: 'exNight' }
+  ];
+
+  var ICON_EDIT = '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var ICON_DEL = '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+  var ICON_X = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+  /* ---------- Storage ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { income: [], expenses: [] };
+      var data = JSON.parse(raw);
+      var expenses = Array.isArray(data.expenses) ? data.expenses : [];
+      expenses.forEach(function (e) {
+        if (!Array.isArray(e.others)) e.others = [];
+        if (!e.incomeId) e.incomeId = '';
+      });
+      return {
+        income: Array.isArray(data.income) ? data.income : [],
+        expenses: expenses
+      };
+    } catch (err) {
+      return { income: [], expenses: [] };
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      alert('Could not save data. Storage may be full or disabled.');
+    }
+  }
+
+  var state = load(); // read only, nothing is written on page load
+  var currentDetail = null;
+  var lastIncomeId = '';
+
+  /* ---------- Helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+
+  function num(v) {
+    var n = parseFloat(v);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function money(n) {
+    var neg = n < 0;
+    var s = Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    return (neg ? '-' : '') + '₹' + s;
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
+  function prettyDate(iso) {
+    var p = String(iso).split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + ' ' + MONTHS[parseInt(p[1], 10) - 1] + ' ' + p[0];
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  function findIncome(id) {
+    if (!id) return null;
+    return state.income.filter(function (i) { return i.id === id; })[0] || null;
+  }
+
+  function incomeName(inc) { return (inc && inc.note) ? inc.note : 'Income'; }
+
+  function othersTotal(e) {
+    return (e.others || []).reduce(function (t, o) { return t + num(o.amount); }, 0);
+  }
+
+  function dayTotal(e) {
+    return num(e.morning) + num(e.afternoon) + num(e.evening) + num(e.night) + othersTotal(e);
+  }
+
+  function spentFor(incomeId, skipExpenseId) {
+    return state.expenses.reduce(function (t, e) {
+      if (e.incomeId === incomeId && e.id !== skipExpenseId) return t + dayTotal(e);
+      return t;
+    }, 0);
+  }
+
+  function byDateDesc(a, b) { return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); }
+  function byDateAsc(a, b) { return a.date > b.date ? 1 : (a.date < b.date ? -1 : 0); }
+
+  /* ---------- Render ---------- */
+  function render() {
+    var incomeSum = state.income.reduce(function (t, i) { return t + num(i.amount); }, 0);
+    var expenseSum = state.expenses.reduce(function (t, e) { return t + dayTotal(e); }, 0);
+    var balance = incomeSum - expenseSum;
+
+    $('incomeTotal').textContent = money(incomeSum);
+    $('expenseTotal').textContent = money(expenseSum);
+    var bal = $('balanceTotal');
+    bal.textContent = money(balance);
+    bal.classList.toggle('negative', balance < 0);
+
+    renderExpenses();
+    renderIncome();
+    if (currentDetail) renderDetail();
+  }
+
+  function expenseCard(e, showChip) {
+    var inc = findIncome(e.incomeId);
+    var chip = showChip
+      ? '<span class="chip' + (inc ? '' : ' unlinked') + '">' + (inc ? esc(incomeName(inc)) : 'Not linked') + '</span>'
+      : '';
+
+    var rows = PERIODS.map(function (p) {
+      var v = num(e[p.key]);
+      return '<div class="row' + (v ? '' : ' empty') + '"><span>' + p.label + '</span><b>' + (v ? money(v) : '—') + '</b></div>';
+    }).join('');
+
+    var others = (e.others || []).filter(function (o) { return num(o.amount) > 0; });
+    var othersHtml = others.length
+      ? '<div class="others">' + others.map(function (o) {
+          return '<div class="row"><span>' + esc(o.name || 'Other') + '</span><b>' + money(num(o.amount)) + '</b></div>';
+        }).join('') + '</div>'
+      : '';
+
+    return '<article class="entry">' +
+      '<div class="entry-head">' +
+        '<div class="entry-title"><span class="entry-date">' + prettyDate(e.date) + '</span>' + chip + '</div>' +
+        '<div class="entry-actions">' +
+          '<button class="icon-btn" data-act="edit-expense" data-id="' + esc(e.id) + '" aria-label="Edit expense">' + ICON_EDIT + '</button>' +
+          '<button class="icon-btn del" data-act="del-expense" data-id="' + esc(e.id) + '" aria-label="Delete expense">' + ICON_DEL + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rows">' + rows + othersHtml + '</div>' +
+      '<div class="total-row"><span>TOTAL</span><b>' + money(dayTotal(e)) + '</b></div>' +
+    '</article>';
+  }
+
+  function renderExpenses() {
+    var list = $('expenseList');
+    var items = state.expenses.slice().sort(byDateDesc);
+
+    if (!items.length) {
+      list.innerHTML = '<div class="empty-state"><strong>No transactions yet</strong>Tap Add Expense to log your first day.</div>';
+      return;
+    }
+    list.innerHTML = items.map(function (e) { return expenseCard(e, true); }).join('');
+  }
+
+  function renderIncome() {
+    var list = $('incomeList');
+    var items = state.income.slice().sort(byDateDesc);
+
+    if (!items.length) {
+      list.innerHTML = '<div class="empty-state"><strong>No transactions yet</strong>Tap Add Income to record money you received.</div>';
+      return;
+    }
+
+    list.innerHTML = items.map(function (i) {
+      var amount = num(i.amount);
+      var spent = spentFor(i.id);
+      var balance = amount - spent;
+      var pct = amount > 0 ? Math.min(100, Math.round((spent / amount) * 100)) : (spent > 0 ? 100 : 0);
+
+      return '<article class="entry">' +
+        '<div class="entry-head">' +
+          '<div class="entry-title"><span class="entry-date">' + prettyDate(i.date) + '</span></div>' +
+          '<div class="entry-actions">' +
+            '<button class="icon-btn" data-act="edit-income" data-id="' + esc(i.id) + '" aria-label="Edit income">' + ICON_EDIT + '</button>' +
+            '<button class="icon-btn del" data-act="del-income" data-id="' + esc(i.id) + '" aria-label="Delete income">' + ICON_DEL + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="inc-name">' + esc(incomeName(i)) + '</div>' +
+        '<div class="inc-amount">' + money(amount) + '</div>' +
+        '<div class="bar' + (balance < 0 ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="inc-stats">' +
+          '<div class="stat spent"><small>Spent</small><b>' + money(spent) + '</b></div>' +
+          '<div class="stat bal' + (balance < 0 ? ' negative' : '') + '"><small>Balance</small><b>' + money(balance) + '</b></div>' +
+        '</div>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="detail" data-id="' + esc(i.id) + '">View details</button>' +
+      '</article>';
+    }).join('');
+  }
+
+  function renderDetail() {
+    var inc = findIncome(currentDetail);
+    if (!inc) { closeSheet('detailModal'); return; }
+
+    var amount = num(inc.amount);
+    var spent = spentFor(inc.id);
+    var balance = amount - spent;
+
+    $('detailTitle').textContent = incomeName(inc);
+    $('detailDate').textContent = prettyDate(inc.date);
+    $('detailIncome').textContent = money(amount);
+    $('detailSpent').textContent = money(spent);
+    $('detailBalance').textContent = money(balance);
+    $('detailBalBox').classList.toggle('negative', balance < 0);
+
+    var items = state.expenses.filter(function (e) { return e.incomeId === inc.id; }).sort(byDateDesc);
+    $('detailList').innerHTML = items.length
+      ? items.map(function (e) { return expenseCard(e, false); }).join('')
+      : '<div class="empty-state"><strong>No expenses yet</strong>Tap Add expense to spend from this income.</div>';
+  }
+
+  /* ---------- Tabs ---------- */
+  function showTab(name) {
+    var isExp = name === 'expenses';
+    $('tabExpenses').classList.toggle('active', isExp);
+    $('tabExpenses').setAttribute('aria-selected', isExp);
+    $('tabIncome').classList.toggle('active', !isExp);
+    $('tabIncome').setAttribute('aria-selected', !isExp);
+    $('expensesPanel').hidden = !isExp;
+    $('incomePanel').hidden = isExp;
+  }
+
+  $('tabExpenses').addEventListener('click', function () { showTab('expenses'); });
+  $('tabIncome').addEventListener('click', function () { showTab('income'); });
+
+  /* ---------- Sheets ---------- */
+  function openSheet(id) {
+    $(id).hidden = false;
+    document.body.classList.add('locked');
+  }
+
+  function closeSheet(id) {
+    $(id).hidden = true;
+    if (id === 'detailModal') currentDetail = null;
+    if (!document.querySelector('.overlay:not([hidden])')) {
+      document.body.classList.remove('locked');
+    }
+  }
+
+  document.querySelectorAll('.overlay').forEach(function (ov) {
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) closeSheet(ov.id);
+    });
+  });
+
+  document.querySelectorAll('[data-close]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ov = b.closest('.overlay');
+      if (ov) closeSheet(ov.id);
+    });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var open = document.querySelectorAll('.overlay:not([hidden])');
+    if (open.length) closeSheet(open[open.length - 1].id);
+  });
+
+  /* ---------- Income form ---------- */
+  var editingIncome = null;
+
+  function openIncome(item) {
+    editingIncome = item ? item.id : null;
+    $('incomeTitle').textContent = item ? 'Edit Income' : 'Add Income';
+    $('incomeAmount').value = item ? item.amount : '';
+    $('incomeDate').value = item ? item.date : todayISO();
+    $('incomeNote').value = item ? (item.note || '') : '';
+    $('incomeError').textContent = '';
+    openSheet('incomeModal');
+    setTimeout(function () { $('incomeAmount').focus(); }, 120);
+  }
+
+  $('addIncomeBtn').addEventListener('click', function () { openIncome(null); });
+
+  $('incomeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var amount = num($('incomeAmount').value);
+    var date = $('incomeDate').value;
+    var note = $('incomeNote').value.trim();
+
+    if (!amount) { $('incomeError').textContent = 'Enter an amount greater than 0.'; return; }
+    if (!date) { $('incomeError').textContent = 'Choose a date.'; return; }
+
+    if (editingIncome) {
+      state.income = state.income.map(function (i) {
+        return i.id === editingIncome ? { id: i.id, amount: amount, date: date, note: note } : i;
+      });
+    } else {
+      var id = uid();
+      state.income.push({ id: id, amount: amount, date: date, note: note });
+      lastIncomeId = id;
+    }
+
+    save();
+    render();
+    closeSheet('incomeModal');
+    showTab('income');
+  });
+
+  /* ---------- Expense form ---------- */
+  var editingExpense = null;
+
+  function addOtherRow(name, amount) {
+    var row = document.createElement('div');
+    row.className = 'other-row';
+    row.innerHTML =
+      '<input type="text" class="o-name" maxlength="40" placeholder="Name (e.g. Tea)" autocomplete="off" aria-label="Expense name" />' +
+      '<input type="number" class="o-amt" inputmode="decimal" min="0" step="any" placeholder="₹" aria-label="Amount" />' +
+      '<button type="button" class="icon-btn del o-del" aria-label="Remove">' + ICON_X + '</button>';
+    row.querySelector('.o-name').value = name || '';
+    row.querySelector('.o-amt').value = amount ? amount : '';
+    $('otherRows').appendChild(row);
+    return row;
+  }
+
+  function collectOthers() {
+    var out = [];
+    $('otherRows').querySelectorAll('.other-row').forEach(function (row) {
+      var amount = num(row.querySelector('.o-amt').value);
+      if (!amount) return;
+      var name = row.querySelector('.o-name').value.trim() || 'Other';
+      out.push({ name: name, amount: amount });
+    });
+    return out;
+  }
+
+  function formTotal() {
+    var t = 0;
+    PERIODS.forEach(function (p) { t += num($(p.input).value); });
+    collectOthers().forEach(function (o) { t += o.amount; });
+    return t;
+  }
+
+  function updateDayTotal() {
+    var total = formTotal();
+    $('expenseDayTotal').textContent = money(total);
+
+    var hint = $('exHint');
+    var inc = findIncome($('exIncome').value);
+    if (!inc) { hint.textContent = ''; hint.classList.remove('negative'); return; }
+    var after = num(inc.amount) - spentFor(inc.id, editingExpense) - total;
+    hint.textContent = 'Balance after this: ' + money(after);
+    hint.classList.toggle('negative', after < 0);
+  }
+
+  function fillIncomeSelect(selectedId, allowEmpty) {
+    var sel = $('exIncome');
+    sel.innerHTML = '';
+    if (allowEmpty) {
+      var ph = document.createElement('option');
+      ph.value = '';
+      ph.textContent = 'Select income';
+      sel.appendChild(ph);
+    }
+    state.income.slice().sort(byDateDesc).forEach(function (i) {
+      var o = document.createElement('option');
+      o.value = i.id;
+      o.textContent = incomeName(i) + ' · ' + money(num(i.amount)) + ' · ' + prettyDate(i.date);
+      sel.appendChild(o);
+    });
+    if (selectedId && findIncome(selectedId)) sel.value = selectedId;
+    else if (allowEmpty) sel.value = '';
+    else if (sel.options.length) sel.selectedIndex = 0;
+  }
+
+  function fillExpense(item) {
+    PERIODS.forEach(function (p) {
+      var v = item ? num(item[p.key]) : 0;
+      $(p.input).value = v ? v : '';
+    });
+    $('otherRows').innerHTML = '';
+    if (item && item.others) {
+      item.others.forEach(function (o) { addOtherRow(o.name, num(o.amount)); });
+    }
+    updateDayTotal();
+  }
+
+  function openExpense(item, presetIncomeId) {
+    editingExpense = item ? item.id : null;
+    $('expenseTitle').textContent = item ? 'Edit Expense' : 'Add Expense';
+    var selected = item ? item.incomeId : (presetIncomeId || lastIncomeId);
+    fillIncomeSelect(selected, !!(item && !item.incomeId));
+    $('expenseDate').value = item ? item.date : todayISO();
+    fillExpense(item);
+    $('expenseError').textContent = '';
+    openSheet('expenseModal');
+  }
+
+  function startAddExpense(presetIncomeId) {
+    if (!state.income.length) {
+      openIncome(null);
+      $('incomeError').textContent = 'Add an income first, then add expenses from it.';
+      return;
+    }
+    openExpense(null, presetIncomeId);
+    checkExisting();
+  }
+
+  $('addExpenseBtn').addEventListener('click', function () { startAddExpense(''); });
+  $('detailAddExpense').addEventListener('click', function () { startAddExpense(currentDetail); });
+
+  $('addOtherBtn').addEventListener('click', function () {
+    var row = addOtherRow('', 0);
+    row.querySelector('.o-name').focus();
+  });
+
+  $('otherRows').addEventListener('input', updateDayTotal);
+  $('otherRows').addEventListener('click', function (e) {
+    var del = e.target.closest('.o-del');
+    if (!del) return;
+    del.closest('.other-row').remove();
+    updateDayTotal();
+  });
+
+  PERIODS.forEach(function (p) {
+    $(p.input).addEventListener('input', updateDayTotal);
+  });
+
+  // Same date + same income = one card, so load the existing day for editing.
+  function checkExisting() {
+    var d = $('expenseDate').value;
+    var incId = $('exIncome').value;
+    if (!d || !incId) { updateDayTotal(); return; }
+    var existing = state.expenses.filter(function (x) { return x.date === d && x.incomeId === incId; })[0];
+    if (existing && existing.id !== editingExpense) {
+      editingExpense = existing.id;
+      $('expenseTitle').textContent = 'Edit Expense';
+      fillExpense(existing);
+    } else {
+      updateDayTotal();
+    }
+  }
+
+  $('expenseDate').addEventListener('change', checkExisting);
+  $('exIncome').addEventListener('change', checkExisting);
+
+  $('expenseForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var date = $('expenseDate').value;
+    var incomeId = $('exIncome').value;
+
+    if (!incomeId) { $('expenseError').textContent = 'Choose which income this is from.'; return; }
+    if (!date) { $('expenseError').textContent = 'Choose a date.'; return; }
+
+    var entry = { date: date, incomeId: incomeId, others: collectOthers() };
+    PERIODS.forEach(function (p) { entry[p.key] = num($(p.input).value); });
+
+    if (!dayTotal(entry)) { $('expenseError').textContent = 'Enter at least one amount.'; return; }
+
+    if (editingExpense) {
+      entry.id = editingExpense;
+      state.expenses = state.expenses.map(function (x) { return x.id === editingExpense ? entry : x; });
+    } else {
+      entry.id = uid();
+      state.expenses.push(entry);
+    }
+
+    lastIncomeId = incomeId;
+    save();
+    render();
+    closeSheet('expenseModal');
+    if ($('detailModal').hidden) showTab('expenses');
+  });
+
+  /* ---------- Confirm sheet ---------- */
+  var pendingConfirm = null;
+
+  function askConfirm(title, sub, onOk) {
+    $('confirmText').textContent = title;
+    $('confirmSub').textContent = sub;
+    pendingConfirm = onOk;
+    openSheet('confirmModal');
+  }
+
+  $('confirmCancel').addEventListener('click', function () {
+    pendingConfirm = null;
+    closeSheet('confirmModal');
+  });
+
+  $('confirmOk').addEventListener('click', function () {
+    var fn = pendingConfirm;
+    pendingConfirm = null;
+    closeSheet('confirmModal');
+    if (fn) fn();
+  });
+
+  /* ---------- List actions ---------- */
+  function onListClick(e) {
+    var btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var act = btn.getAttribute('data-act');
+
+    if (act === 'edit-expense') {
+      var ex = state.expenses.filter(function (x) { return x.id === id; })[0];
+      if (ex) openExpense(ex);
+    } else if (act === 'edit-income') {
+      var inc = findIncome(id);
+      if (inc) openIncome(inc);
+    } else if (act === 'detail') {
+      currentDetail = id;
+      renderDetail();
+      if (currentDetail) openSheet('detailModal');
+    } else if (act === 'del-expense') {
+      askConfirm('Delete this expense?', 'This cannot be undone.', function () {
+        state.expenses = state.expenses.filter(function (x) { return x.id !== id; });
+        save();
+        render();
+      });
+    } else if (act === 'del-income') {
+      var linked = state.expenses.filter(function (x) { return x.incomeId === id; }).length;
+      var sub = linked
+        ? 'This also deletes ' + linked + ' expense ' + (linked === 1 ? 'entry' : 'entries') + ' from this income. This cannot be undone.'
+        : 'This cannot be undone.';
+      askConfirm('Delete this income?', sub, function () {
+        state.income = state.income.filter(function (x) { return x.id !== id; });
+        state.expenses = state.expenses.filter(function (x) { return x.incomeId !== id; });
+        save();
+        render();
+      });
+    }
+  }
+
+  $('expenseList').addEventListener('click', onListClick);
+  $('incomeList').addEventListener('click', onListClick);
+  $('detailList').addEventListener('click', onListClick);
+
+  /* ---------- Excel export ---------- */
+  var XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+
+  // The Excel library loads in the background, so it can never block the buttons.
+  function loadXLSX(cb) {
+    if (typeof XLSX !== 'undefined') { cb(true); return; }
+    var s = document.createElement('script');
+    s.src = XLSX_URL;
+    s.onload = function () { cb(typeof XLSX !== 'undefined'); };
+    s.onerror = function () { cb(false); };
+    document.head.appendChild(s);
+  }
+
+  window.addEventListener('load', function () {
+    setTimeout(function () { loadXLSX(function () {}); }, 1500);
+  });
+
+  function exportExcel(incomeId) {
+    loadXLSX(function (ok) {
+      if (!ok) {
+        alert('Excel export needs an internet connection. Connect and try again.');
+        return;
+      }
+      buildExcel(incomeId);
+    });
+  }
+
+  function buildExcel(incomeId) {
+
+    var incomes = (incomeId ? state.income.filter(function (i) { return i.id === incomeId; }) : state.income.slice()).sort(byDateAsc);
+    var expenses = (incomeId ? state.expenses.filter(function (e) { return e.incomeId === incomeId; }) : state.expenses.slice()).sort(byDateAsc);
+
+    if (!incomes.length && !expenses.length) {
+      alert('No data to export yet.');
+      return;
+    }
+
+    // Summary
+    var summary = [['Income', 'Date', 'Amount (₹)', 'Spent (₹)', 'Balance (₹)']];
+    var totalAmount = 0;
+    var totalSpent = 0;
+    incomes.forEach(function (i) {
+      var amount = num(i.amount);
+      var spent = spentFor(i.id);
+      totalAmount += amount;
+      totalSpent += spent;
+      summary.push([incomeName(i), prettyDate(i.date), amount, spent, amount - spent]);
+    });
+    if (!incomeId) {
+      var unlinked = state.expenses.filter(function (e) { return !findIncome(e.incomeId); })
+        .reduce(function (t, e) { return t + dayTotal(e); }, 0);
+      if (unlinked > 0) {
+        totalSpent += unlinked;
+        summary.push(['Not linked', '', 0, unlinked, -unlinked]);
+      }
+    }
+    summary.push(['Total', '', totalAmount, totalSpent, totalAmount - totalSpent]);
+
+    // Expenses and other expenses
+    var exRows = [['Date', 'Income', 'Morning', 'Afternoon', 'Evening', 'Night', 'Other', 'Day Total']];
+    var otherRows = [['Date', 'Income', 'Name', 'Amount (₹)']];
+    expenses.forEach(function (e) {
+      var inc = findIncome(e.incomeId);
+      var name = inc ? incomeName(inc) : 'Not linked';
+      exRows.push([prettyDate(e.date), name, num(e.morning), num(e.afternoon), num(e.evening), num(e.night), othersTotal(e), dayTotal(e)]);
+      (e.others || []).forEach(function (o) {
+        if (num(o.amount) > 0) otherRows.push([prettyDate(e.date), name, o.name || 'Other', num(o.amount)]);
+      });
+    });
+
+    var wb = XLSX.utils.book_new();
+
+    var ws1 = XLSX.utils.aoa_to_sheet(summary);
+    ws1['!cols'] = [{ wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+
+    var ws2 = XLSX.utils.aoa_to_sheet(exRows);
+    ws2['!cols'] = [{ wch: 14 }, { wch: 22 }, { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Daily Expenses');
+
+    var ws3 = XLSX.utils.aoa_to_sheet(otherRows);
+    ws3['!cols'] = [{ wch: 14 }, { wch: 22 }, { wch: 24 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Other Expenses');
+
+    var label = 'All';
+    if (incomeId && incomes[0]) label = incomeName(incomes[0]).replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') || 'Income';
+    XLSX.writeFile(wb, 'Income-Expense_' + label + '_' + todayISO() + '.xlsx');
+  }
+
+  $('exportAllBtn').addEventListener('click', function () { exportExcel(null); });
+  $('detailExport').addEventListener('click', function () { if (currentDetail) exportExcel(currentDetail); });
+
+  /* ---------- Clear all ---------- */
+  $('clearAllBtn').addEventListener('click', function () {
+    askConfirm('Delete all saved data?', 'All income and expenses will be removed. This cannot be undone.', function () {
+      state = { income: [], expenses: [] };
+      lastIncomeId = '';
+      try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+      render();
+    });
+  });
+
+  /* ---------- Start ---------- */
+  render();
+})();
+
+  </script>
+</body>
+</html>
