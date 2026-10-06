@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#161a45" />
   <title>Income &amp; Expense</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Inc&amp;Exp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -646,4 +638,16 @@ button { cursor: pointer; }
         </div>
         <p class="error" id="expenseError" role="alert"></p>
         <div class="sheet-actions">
-          <button type="but
+          <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn-expense">Save expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm sheet -->
+  <div class="overlay" id="confirmModal" hidden>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+      <div class="grabber" aria-hidden="true"></div>
+      <h2 id="confirmText">Delete all saved data?</h2>
+      <p class="muted" id="confirmSub">This 
